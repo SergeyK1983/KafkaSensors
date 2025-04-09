@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:17.4-alpine
+    container_name: pgdb
+    hostname: database
+    restart: always
+    env_file:
+      - ./clusterkafka/.env
+    environment:
+      - ./clusterkafka/.env
+    volumes:
+      - pgdb:/var/lib/postgresql/data
+    ports:
+      - "5437:5432"
+
+volumes:
+  pgdb:
+    name: cluster_db
