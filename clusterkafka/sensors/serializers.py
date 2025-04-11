@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
 
@@ -14,7 +14,8 @@ class ElectricDriveSerializer(serializers.Serializer):
     stop = serializers.BooleanField(help_text="Остановлен")
     alarm = serializers.BooleanField(default=False, help_text="Тревога/Авария")
     operating_time = serializers.IntegerField(
-        validators=[MinValueValidator(0)], required=False, allow_null=True, help_text="Время наработки, в часах"
+        validators=[MinValueValidator(0), MaxValueValidator(100000)], required=False, allow_null=True,
+        help_text="Время наработки, в часах"
     )
     is_frequency_converter = serializers.BooleanField(default=False, help_text="Наличие ЧП")
     frequency_converter = FrequencyConverterSerializer(required=False, many=False)
@@ -35,7 +36,43 @@ class PumpGroupControlMode(serializers.Serializer):
 
 class TelemetryHeatPointSerializer(serializers.Serializer):
     """ Телеметрия теплового пункта """
-    pass
+
+    pressure_supply_pipeline_heating_input = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(1600.00)],
+        help_text="Давление в подающем трубопроводе ТС, вход, кПа"
+    )
+    pressure_return_pipeline_heating_input = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(1600.00)],
+        help_text="Давление в обратном трубопроводе ТС, вход, кПа"
+    )
+    temperature_supply_pipeline_heating_input = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(200.00)],
+        help_text="Температура в подающем трубопроводе ТС, вход, С"
+    )
+    temperature_return_pipeline_heating_input = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(200.00)],
+        help_text="Температура в обратном трубопроводе ТС, вход, С"
+    )
+    outdoor_air_temperature = serializers.FloatField(
+        validators=[MinValueValidator(-60.00), MaxValueValidator(60.00)],
+        help_text="Температура наружного воздуха, С"
+    )
+    pressure_supply_pipeline_heating_output = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(1600.00)],
+        help_text="Давление в подающем трубопроводе ТС, выход, кПа"
+    )
+    pressure_return_pipeline_heating_output = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(1600.00)],
+        help_text="Давление в обратном трубопроводе ТС, выход, кПа"
+    )
+    temperature_supply_pipeline_heating_output = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(200.00)],
+        help_text="Температура в подающем трубопроводе ТС, выход, С"
+    )
+    temperature_return_pipeline_heating_output = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(200.00)],
+        help_text="Температура в обратном трубопроводе ТС, выход, С"
+    )
 
 
 class TelemetrySerializer(serializers.Serializer):
