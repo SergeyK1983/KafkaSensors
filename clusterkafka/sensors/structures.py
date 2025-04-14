@@ -1,28 +1,38 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field, asdict
 
 
-class FrequencyConverterDC(dataclass):
+@dataclass
+class CommonBaseMethods:
+
+    def model_dump(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
+class FrequencyConverterDC:
     """ Частотный преобразователь """
 
     alarm: bool = False
 
 
-class ElectricDriveDC(dataclass):
+@dataclass
+class ElectricDriveDC(CommonBaseMethods):
     """ Состояние электропривода """
 
-    name: str = ""
+    name: str
     work: bool
     stop: bool
-    alarm: bool = False
+    alarm: bool
     operating_time: int
     is_frequency_converter: bool
     frequency_converter: FrequencyConverterDC | None = None
 
 
-class PumpGroupControlModeDC(dataclass):
+@dataclass
+class PumpGroupControlModeDC:
     """ Группа насосов, режим работы """
 
-    name: str = ""
+    name: str
     is_automatic: bool
-    electric_drivers: list[ElectricDriveDC]
+    electric_drivers: list[ElectricDriveDC] = field(default_factory=list)
 
