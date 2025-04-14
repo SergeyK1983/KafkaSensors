@@ -1,5 +1,3 @@
-from datetime import datetime, time
-
 from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
