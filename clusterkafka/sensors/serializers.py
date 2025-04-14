@@ -20,12 +20,14 @@ class ElectricDriveSerializer(serializers.Serializer):
         help_text="Время наработки, в часах"
     )
     is_frequency_converter = serializers.BooleanField(default=False, help_text="Наличие ЧП")
-    frequency_converter = FrequencyConverterSerializer(required=False, many=False)
+    frequency_converter = FrequencyConverterSerializer(required=False, allow_null=True, many=False)
 
-    def validate_is_frequency_converter(self, attrs):
-        if attrs["frequency_converter"]:
-            if not attrs["is_frequency_converter"]:
-                raise serializers.ValidationError(f"Поле 'is_frequency_converter' должно быть True")
+    def validate(self, data):
+        if data["frequency_converter"]:
+            if not data["is_frequency_converter"]:
+                raise serializers.ValidationError(detail="Поле 'is_frequency_converter' должно быть True")
+
+        return data
 
 
 class PumpGroupControlModeSerializer(serializers.Serializer):

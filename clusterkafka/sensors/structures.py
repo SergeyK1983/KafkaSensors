@@ -23,8 +23,8 @@ class ElectricDriveDC(CommonBaseMethods):
     work: bool
     stop: bool
     alarm: bool
-    operating_time: int
-    is_frequency_converter: bool
+    operating_time: int | None
+    is_frequency_converter: bool = False
     frequency_converter: FrequencyConverterDC | None = None
 
 

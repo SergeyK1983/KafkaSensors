@@ -1,7 +1,8 @@
 import pytest
-
 from rest_framework.exceptions import ValidationError
-from ..serializers import TimeSpentStateSerializer
+
+from ..serializers import TimeSpentStateSerializer, ElectricDriveSerializer
+from ..structures import ElectricDriveDC, FrequencyConverterDC
 
 
 class TestTimeSpentStateSerializer:
@@ -22,5 +23,35 @@ class TestTimeSpentStateSerializer:
         data = {"quantity_seconds": -10}
         with pytest.raises(ValidationError):
             serializer = TimeSpentStateSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+
+
+class TestElectricDriveSerializer:
+
+    def test_validate_data(self):
+        electric_drive = ElectricDriveDC(
+            name="Циркуляционный насос №1",
+            work=True,
+            stop=False,
+            alarm=False,
+            operating_time=8,
+            is_frequency_converter=False
+        )
+        serializer = ElectricDriveSerializer(data=electric_drive.model_dump())
+        assert serializer.is_valid(raise_exception=True) is True
+
+    def test_not_validate_data(self):
+        frequency_converter = FrequencyConverterDC(alarm=False)
+        electric_drive = ElectricDriveDC(
+            name="Циркуляционный насос №1",
+            work=True,
+            stop=False,
+            alarm=False,
+            operating_time=8,
+            is_frequency_converter=False,
+            frequency_converter=frequency_converter
+        )
+        with pytest.raises(ValidationError) as exc_info:
+            serializer = TimeSpentStateSerializer(data=electric_drive.model_dump())
             serializer.is_valid(raise_exception=True)
 
