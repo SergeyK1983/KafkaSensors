@@ -16,16 +16,18 @@ class ElectricDriveSerializer(serializers.Serializer):
     stop = serializers.BooleanField(help_text="Остановлен")
     alarm = serializers.BooleanField(default=False, help_text="Тревога/Авария")
     operating_time = serializers.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100000)], required=False, allow_null=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100000)],
+        required=False,
+        allow_null=True,
         help_text="Время наработки, в часах"
     )
     is_frequency_converter = serializers.BooleanField(default=False, help_text="Наличие ЧП")
     frequency_converter = FrequencyConverterSerializer(required=False, allow_null=True, many=False)
 
     def validate(self, data):
-        if data["frequency_converter"]:
-            if not data["is_frequency_converter"]:
-                raise serializers.ValidationError(detail="Поле 'is_frequency_converter' должно быть True")
+        if data["frequency_converter"] and not data["is_frequency_converter"]:
+            msg = {"is_frequency_converter": "Поле должно быть True"}
+            raise serializers.ValidationError(msg)
 
         return data
 

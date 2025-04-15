@@ -27,31 +27,39 @@ class TestTimeSpentStateSerializer:
 
 
 class TestElectricDriveSerializer:
+    electric_drive = ElectricDriveDC(
+        name="Циркуляционный насос №1",
+        work=True,
+        stop=False,
+        alarm=False,
+        operating_time=8,
+        is_frequency_converter=False
+    )
+    frequency_converter = FrequencyConverterDC(alarm=False)
 
     def test_validate_data(self):
-        electric_drive = ElectricDriveDC(
-            name="Циркуляционный насос №1",
-            work=True,
-            stop=False,
-            alarm=False,
-            operating_time=8,
-            is_frequency_converter=False
-        )
+        serializer = ElectricDriveSerializer(data=self.electric_drive.model_dump())
+        assert serializer.is_valid(raise_exception=True) is True
+
+        # Добавляем вложенный ЧП
+        electric_drive = ElectricDriveDC(**self.electric_drive.model_dump())
+        electric_drive.is_frequency_converter = True
+        electric_drive.frequency_converter = self.frequency_converter
+
         serializer = ElectricDriveSerializer(data=electric_drive.model_dump())
         assert serializer.is_valid(raise_exception=True) is True
 
+        serializer_data: dict = serializer.data
+        assert len(serializer_data) == 7
+
     def test_not_validate_data(self):
-        frequency_converter = FrequencyConverterDC(alarm=False)
-        electric_drive = ElectricDriveDC(
-            name="Циркуляционный насос №1",
-            work=True,
-            stop=False,
-            alarm=False,
-            operating_time=8,
-            is_frequency_converter=False,
-            frequency_converter=frequency_converter
-        )
+        """ Тестируется доп. проверка в методе 'validate' """
+
+        self.electric_drive.frequency_converter = self.frequency_converter
+        serializer = ElectricDriveSerializer(data=self.electric_drive.model_dump())
+
         with pytest.raises(ValidationError) as exc_info:
-            serializer = TimeSpentStateSerializer(data=electric_drive.model_dump())
             serializer.is_valid(raise_exception=True)
+
+        assert "Поле должно быть True" in str(exc_info.value)
 
