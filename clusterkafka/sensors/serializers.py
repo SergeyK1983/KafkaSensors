@@ -59,9 +59,36 @@ class TimeSpentStateSerializer(serializers.Serializer):
 
 
 class FloodMonitoringSerializer(TimeSpentStateSerializer, serializers.Serializer):
-    """ Контроль затопления """
+    """ Контроль затопления. В т.ч. время пребывания в состоянии True. """
 
     is_flood = serializers.BooleanField(default=False, help_text="Затопление")
+
+
+class HeatMeterSerializer(serializers.Serializer):
+    """ Теплосчетчик с часовыми показателями. """
+
+    time_created_seconds = serializers.IntegerField(
+        required=False,
+        validators=[MinValueValidator(0)],
+        help_text="Время архивирования, дата с 01.01.1970"
+    )
+    mass_consumption_supply = serializers.FloatField(
+        validators=[MinValueValidator(0.0000)],
+        help_text="Массовый расход теплоносителя подающий, т"
+    )
+    mass_consumption_return = serializers.FloatField(
+        validators=[MinValueValidator(0.0000)],
+        help_text="Массовый расход теплоносителя обратный, т"
+    )
+    mass_consumption_replenish = serializers.FloatField(
+        required=False,
+        validators=[MinValueValidator(0.0000)],
+        help_text="Массовый расход теплоносителя подпитка, т"
+    )
+    heat_energy_consumption = serializers.FloatField(
+        validators=[MinValueValidator(0.0000)],
+        help_text="Расход тепловой энергии, Гкал"
+    )
 
 
 class TelemetryHeatPointSerializer(serializers.Serializer):
