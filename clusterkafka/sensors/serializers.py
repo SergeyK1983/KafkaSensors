@@ -58,25 +58,25 @@ class TimeSpentStateSerializer(serializers.Serializer):
         return time_spent
 
 
-class FloodMonitoringSerializer(TimeSpentStateSerializer, serializers.Serializer):
+class FloodMonitoringSerializer(TimeSpentStateSerializer):
     """ Контроль затопления. В т.ч. время пребывания в состоянии True. """
 
     is_flood = serializers.BooleanField(default=False, help_text="Затопление")
 
 
-class IllegalAccessSerializer(TimeSpentStateSerializer, serializers.Serializer):
+class IllegalAccessSerializer(TimeSpentStateSerializer):
     """ Открытие дверей. Несанкционированный доступ. В т.ч. время пребывания в состоянии True. """
 
     door_is_open = serializers.BooleanField(default=False, help_text="Открытие дверей")
 
 
-class PowerSupplyMonitoringSerializer(TimeSpentStateSerializer, serializers.Serializer):
+class PowerSupplyMonitoringSerializer(TimeSpentStateSerializer):
     """ Контроль наличия напряжения на вводе. True если авария. В т.ч. время пребывания в состоянии True. """
 
     is_power_failure = serializers.BooleanField(default=False, help_text="Авария электропитания")
 
 
-class PressureMaintenanceMonitoringSerializer(TimeSpentStateSerializer, serializers.Serializer):
+class PressureMaintenanceMonitoringSerializer(TimeSpentStateSerializer):
     """ Контроль работы установок поддержания давления. True если авария. В т.ч. время пребывания в состоянии True. """
 
     is_pressure_maintenance_failure = serializers.BooleanField(
