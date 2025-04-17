@@ -64,13 +64,18 @@ class FloodMonitoringSerializer(TimeSpentStateSerializer, serializers.Serializer
     is_flood = serializers.BooleanField(default=False, help_text="Затопление")
 
 
-class HeatMeterSerializer(serializers.Serializer):
-    """ Теплосчетчик с часовыми показателями. """
+class IllegalAccessSerializer(TimeSpentStateSerializer, serializers.Serializer):
+    """ Открытие дверей. Несанкционированный доступ. В т.ч. время пребывания в состоянии True. """
 
-    time_created_seconds = serializers.IntegerField(
+    door_is_open = serializers.BooleanField(default=False, help_text="Открытие дверей")
+
+
+class HeatMeterSerializer(serializers.Serializer):
+    """ Теплосчетчик с часовыми показателями. Учетные показатели с нарастающим итогом. """
+
+    time_created_seconds = serializers.DateTimeField(
         required=False,
-        validators=[MinValueValidator(0)],
-        help_text="Время архивирования, дата с 01.01.1970"
+        help_text="Время архивирования"
     )
     mass_consumption_supply = serializers.FloatField(
         validators=[MinValueValidator(0.0000)],
@@ -85,10 +90,42 @@ class HeatMeterSerializer(serializers.Serializer):
         validators=[MinValueValidator(0.0000)],
         help_text="Массовый расход теплоносителя подпитка, т"
     )
+    consumption_replenish = serializers.FloatField(
+        required=False,
+        validators=[MinValueValidator(0.0000)],
+        help_text="Расход воды, подпитка, м3"
+    )
     heat_energy_consumption = serializers.FloatField(
         validators=[MinValueValidator(0.0000)],
         help_text="Расход тепловой энергии, Гкал"
     )
+    temperature_supply_pipeline = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(200.00)],
+        help_text="Температура в подающем трубопроводе ТС, С"
+    )
+    temperature_return_pipeline = serializers.FloatField(
+        validators=[MinValueValidator(0.00), MaxValueValidator(200.00)],
+        help_text="Температура в обратном трубопроводе ТС, С"
+    )
+    pressure_supply_pipeline = serializers.FloatField(
+        required=False,
+        validators=[MinValueValidator(0.000), MaxValueValidator(1.600)],
+        help_text="Давление в подающем трубопроводе ТС, МПа"
+    )
+    pressure_return_pipeline = serializers.FloatField(
+        required=False,
+        validators=[MinValueValidator(0.000), MaxValueValidator(1.600)],
+        help_text="Давление в обратном трубопроводе ТС, МПа"
+    )
+    time_normal_mode = serializers.IntegerField(
+        validators=[MinValueValidator(0)],
+        help_text="Чистое время работы в нормальном режиме, мин."
+    )
+    time_error_mode = serializers.IntegerField(
+        validators=[MinValueValidator(0)],
+        help_text="Общее время простоя, мин."
+    )
+    checksum = serializers.IntegerField(help_text="Контрольная сумма")
 
 
 class TelemetryHeatPointSerializer(serializers.Serializer):
