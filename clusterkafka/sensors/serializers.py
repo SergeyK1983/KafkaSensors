@@ -70,6 +70,20 @@ class IllegalAccessSerializer(TimeSpentStateSerializer, serializers.Serializer):
     door_is_open = serializers.BooleanField(default=False, help_text="Открытие дверей")
 
 
+class PowerSupplyMonitoringSerializer(TimeSpentStateSerializer, serializers.Serializer):
+    """ Контроль наличия напряжения на вводе. True если авария. В т.ч. время пребывания в состоянии True. """
+
+    is_power_failure = serializers.BooleanField(default=False, help_text="Авария электропитания")
+
+
+class PressureMaintenanceMonitoringSerializer(TimeSpentStateSerializer, serializers.Serializer):
+    """ Контроль работы установок поддержания давления. True если авария. В т.ч. время пребывания в состоянии True. """
+
+    is_pressure_maintenance_failure = serializers.BooleanField(
+        default=False, help_text="Авария установок поддержания давления"
+    )
+
+
 class HeatMeterSerializer(serializers.Serializer):
     """ Теплосчетчик с часовыми показателями. Учетные показатели с нарастающим итогом. """
 
@@ -167,7 +181,8 @@ class TelemetryHeatPointSerializer(serializers.Serializer):
         validators=[MinValueValidator(0.00), MaxValueValidator(200.00)],
         help_text="Температура в обратном трубопроводе ТС, выход, С"
     )
-    is_input_voltage = serializers.BooleanField(help_text="Контроль напряжения на вводе ИТП")
+    power_input_main = PowerSupplyMonitoringSerializer(many=False)
+    power_input_reserve = PowerSupplyMonitoringSerializer(many=False)
 
 
 class TelemetrySerializer(serializers.Serializer):
