@@ -1,8 +1,10 @@
 import pytest
+from typing import Callable
 from rest_framework.exceptions import ValidationError
 
-from ..serializers import TimeSpentStateSerializer, ElectricDriveSerializer
-from ..structures import ElectricDriveDC, FrequencyConverterDC
+from ..serializers import TimeSpentStateSerializer, ElectricDriveSerializer, FloodMonitoringSerializer, \
+    IllegalAccessSerializer, PressureMaintenanceMonitoringSerializer, PowerSupplyMonitoringSerializer
+from ..structures import ElectricDriveDC, FrequencyConverterDC, AlarmSituationDC
 
 
 class TestTimeSpentStateSerializer:
@@ -62,4 +64,35 @@ class TestElectricDriveSerializer:
             serializer.is_valid(raise_exception=True)
 
         assert "Поле должно быть True" in str(exc_info.value)
+
+
+class TestAlarmSerializers:
+
+    ALARMS: tuple[Callable] = (
+        FloodMonitoringSerializer,
+        IllegalAccessSerializer,
+        PowerSupplyMonitoringSerializer,
+        PressureMaintenanceMonitoringSerializer
+    )
+
+    @pytest.mark.parametrize("alarm", [*ALARMS])
+    def test_alarms_validate_data(self, alarm):
+        alarm_signal = AlarmSituationDC(alarm=True, quantity_seconds=10)
+        serializer = alarm(data=alarm_signal.model_dump())
+
+        assert serializer.is_valid(raise_exception=True) is True
+
+        data = serializer.data
+        assert len(data) == 2
+        assert data.get("time_spent") is not None
+
+    @pytest.mark.parametrize("alarm", [*ALARMS])
+    def test_alarms_not_validate_data(self, alarm):
+        """ Seconds should be positive numbers. """
+
+        alarm_signal = AlarmSituationDC(alarm=True, quantity_seconds=-2)
+
+        with pytest.raises(ValidationError):
+            serializer = alarm(data=alarm_signal.model_dump())
+            serializer.is_valid(raise_exception=True)
 

@@ -29,10 +29,17 @@ class ElectricDriveDC(CommonBaseMethods):
 
 
 @dataclass
-class PumpGroupControlModeDC:
+class PumpGroupControlModeDC(CommonBaseMethods):
     """ Группа насосов, режим работы """
 
     name: str
     is_automatic: bool
     electric_drivers: list[ElectricDriveDC] = field(default_factory=list)
 
+
+@dataclass
+class AlarmSituationDC(CommonBaseMethods):
+    """ Аварийная ситуация, аварийный режим """
+
+    alarm: bool = False
+    quantity_seconds: int = 0
