@@ -142,6 +142,10 @@ class HeatMeterSerializer(serializers.Serializer):
     checksum = serializers.IntegerField(help_text="Контрольная сумма")
 
 
+class HeatMeterNamedSerializer(HeatMeterSerializer):
+    name = serializers.CharField(max_length=100, min_length=1, help_text="Наименование по схеме")
+
+
 class TelemetryHeatPointSerializer(serializers.Serializer):
     """ Телеметрия теплового пункта """
 
@@ -181,8 +185,15 @@ class TelemetryHeatPointSerializer(serializers.Serializer):
         validators=[MinValueValidator(0.00), MaxValueValidator(200.00)],
         help_text="Температура в обратном трубопроводе ТС, выход, С"
     )
-    power_input_main = PowerSupplyMonitoringSerializer(many=False)
-    power_input_reserve = PowerSupplyMonitoringSerializer(many=False)
+    power_input_main = PowerSupplyMonitoringSerializer(many=False, help_text="Основной ввод электропитания ИТП")
+    power_input_reserve = PowerSupplyMonitoringSerializer(many=False, help_text="Резервный ввод электропитания ИТП")
+    pressure_maintenance = PressureMaintenanceMonitoringSerializer(many=False)
+    illegal_access = IllegalAccessSerializer(many=False)
+    flood_monitoring = FloodMonitoringSerializer(many=False)
+
+
+class TelemetryHeatPointNamedSerializer(TelemetryHeatPointSerializer):
+    name = serializers.CharField(max_length=100, min_length=1, help_text="Наименование по схеме")
 
 
 class TelemetrySerializer(serializers.Serializer):
