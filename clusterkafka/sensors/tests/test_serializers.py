@@ -3,8 +3,9 @@ from typing import Callable
 from rest_framework.exceptions import ValidationError
 
 from ..serializers import TimeSpentStateSerializer, ElectricDriveSerializer, FloodMonitoringSerializer, \
-    IllegalAccessSerializer, PressureMaintenanceMonitoringSerializer, PowerSupplyMonitoringSerializer
-from ..structures import ElectricDriveDC, FrequencyConverterDC, AlarmSituationDC
+    IllegalAccessSerializer, PressureMaintenanceMonitoringSerializer, PowerSupplyMonitoringSerializer, \
+    PumpGroupControlModeSerializer
+from ..structures import ElectricDriveDC, FrequencyConverterDC, AlarmSituationDC, PumpGroupControlModeDC
 
 
 class TestTimeSpentStateSerializer:
@@ -64,6 +65,40 @@ class TestElectricDriveSerializer:
             serializer.is_valid(raise_exception=True)
 
         assert "Поле должно быть True" in str(exc_info.value)
+
+
+class TestPumpGroupControlModeSerializer:
+
+    def test_validate_data(self, data_for_driver):
+        driver_1 = ElectricDriveDC(**data_for_driver)
+        driver_2 = ElectricDriveDC(**data_for_driver)
+        driver_2.name = "Циркуляционный насос №2"
+        driver_2.work = False
+        driver_2.stop = True
+
+        circulation_pumps = PumpGroupControlModeDC(
+            name="Циркуляционные насосы",
+            is_automatic=True,
+            electric_drivers=[driver_1, driver_2]
+        )
+        serializer = PumpGroupControlModeSerializer(data=circulation_pumps.model_dump())
+        assert serializer.is_valid(raise_exception=True) is True
+
+        data: dict = serializer.data
+        assert len(data) == 3
+
+    def test_not_validate_data(self):
+        """ Список насосов в группе не должен быть пустым """
+
+        circulation_pumps = PumpGroupControlModeDC(
+            name="Циркуляционные насосы",
+            is_automatic=True
+        )
+        serializer = PumpGroupControlModeSerializer(data=circulation_pumps.model_dump())
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.is_valid(raise_exception=True)
+
+        assert "Список не должен быть пустым" in str(exc_info.value)
 
 
 class TestAlarmSerializers:

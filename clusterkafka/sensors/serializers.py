@@ -47,6 +47,13 @@ class PumpGroupControlModeSerializer(serializers.Serializer):
     is_automatic = serializers.BooleanField(help_text="Автоматическое управление")
     electric_drivers = ElectricDriveSerializer(many=True)
 
+    def validate_electric_drivers(self, value):
+        if not value:
+            msg = {"electric_drivers": "Список не должен быть пустым"}
+            raise serializers.ValidationError(msg)
+
+        return value
+
 
 class TimeSpentStateSerializer(serializers.Serializer):
     """ Время пребывания в состоянии. Входное значение - количество секунд. """
