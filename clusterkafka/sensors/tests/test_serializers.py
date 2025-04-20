@@ -83,7 +83,9 @@ class TestAlarmSerializers:
         assert serializer.is_valid(raise_exception=True) is True
 
         data = serializer.data
-        assert len(data) == 2
+        assert len(data) == 3
+        assert data.get("name") is not None
+        assert data.get("alarm") is not None
         assert data.get("time_spent") is not None
 
     @pytest.mark.parametrize("alarm", [*ALARMS])

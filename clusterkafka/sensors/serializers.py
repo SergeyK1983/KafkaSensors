@@ -1,11 +1,19 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
+from sensors.constants import AlarmSignalsHeatPoint
 
-class FrequencyConverterSerializer(serializers.Serializer):
-    """ Частотный преобразователь """
+
+class AlarmSignalMixin(serializers.Serializer):
+    """ Аварийный сигнал (общий) """
 
     alarm = serializers.BooleanField(default=False, help_text="Тревога/Авария")
+
+
+class FrequencyConverterSerializer(AlarmSignalMixin):
+    """ Частотный преобразователь """
+
+    pass
 
 
 class ElectricDriveSerializer(serializers.Serializer):
@@ -58,30 +66,28 @@ class TimeSpentStateSerializer(serializers.Serializer):
         return time_spent
 
 
-class FloodMonitoringSerializer(TimeSpentStateSerializer):
+class FloodMonitoringSerializer(AlarmSignalMixin, TimeSpentStateSerializer):
     """ Контроль затопления. В т.ч. время пребывания в состоянии True. """
 
-    is_flood = serializers.BooleanField(default=False, help_text="Затопление")
+    name = serializers.CharField(default=AlarmSignalsHeatPoint.is_flood.value, read_only=True)
 
 
-class IllegalAccessSerializer(TimeSpentStateSerializer):
+class IllegalAccessSerializer(AlarmSignalMixin, TimeSpentStateSerializer):
     """ Открытие дверей. Несанкционированный доступ. В т.ч. время пребывания в состоянии True. """
 
-    door_is_open = serializers.BooleanField(default=False, help_text="Открытие дверей")
+    name = serializers.CharField(default=AlarmSignalsHeatPoint.door_is_open.value, read_only=True)
 
 
-class PowerSupplyMonitoringSerializer(TimeSpentStateSerializer):
+class PowerSupplyMonitoringSerializer(AlarmSignalMixin, TimeSpentStateSerializer):
     """ Контроль наличия напряжения на вводе. True если авария. В т.ч. время пребывания в состоянии True. """
 
-    is_power_failure = serializers.BooleanField(default=False, help_text="Авария электропитания")
+    name = serializers.CharField(default=AlarmSignalsHeatPoint.is_power_failure.value, read_only=True)
 
 
-class PressureMaintenanceMonitoringSerializer(TimeSpentStateSerializer):
+class PressureMaintenanceMonitoringSerializer(AlarmSignalMixin, TimeSpentStateSerializer):
     """ Контроль работы установок поддержания давления. True если авария. В т.ч. время пребывания в состоянии True. """
 
-    is_pressure_maintenance_failure = serializers.BooleanField(
-        default=False, help_text="Авария установок поддержания давления"
-    )
+    name = serializers.CharField(default=AlarmSignalsHeatPoint.is_pressure_maintenance_failure.value, read_only=True)
 
 
 class HeatMeterSerializer(serializers.Serializer):
