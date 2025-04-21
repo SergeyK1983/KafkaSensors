@@ -1,14 +1,16 @@
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 
-from sensors.constants import AlarmSignalsHeatPoint
-
 
 @dataclass
 class CommonBaseMethods:
 
     def model_dump(self) -> dict:
         return asdict(self)
+
+    def list_fields(self) -> list:
+        attrs: list[str] = list(asdict(self).keys())
+        return attrs
 
 
 @dataclass
@@ -53,16 +55,16 @@ class HeatMeterNamedDC(CommonBaseMethods):
     """ Учет тепловой энергии. HeatMeterNamedSerializer. """
 
     name: str
-    time_created_seconds: datetime
+    time_created_seconds: datetime | None
     mass_consumption_supply: float
     mass_consumption_return: float
-    mass_consumption_replenish: float
-    consumption_replenish: float
+    mass_consumption_replenish: float | None
+    consumption_replenish: float | None
     heat_energy_consumption: float
     temperature_supply_pipeline: float
     temperature_return_pipeline: float
-    pressure_supply_pipeline: float
-    pressure_return_pipeline: float
+    pressure_supply_pipeline: float | None
+    pressure_return_pipeline: float | None
     time_normal_mode: int
     time_error_mode: int
     checksum: int

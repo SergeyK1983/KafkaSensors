@@ -1,11 +1,14 @@
 import pytest
+from datetime import datetime
 from typing import Callable
 from rest_framework.exceptions import ValidationError
 
 from sensors.serializers.serializers import TimeSpentStateSerializer, ElectricDriveSerializer, \
     FloodMonitoringSerializer, IllegalAccessSerializer, PressureMaintenanceMonitoringSerializer, \
     PowerSupplyMonitoringSerializer, PumpGroupControlModeSerializer
-from ..structures import ElectricDriveDC, FrequencyConverterDC, AlarmSituationDC, PumpGroupControlModeDC
+from ..serializers.telemetry import HeatMeterNamedSerializer
+from ..structures import ElectricDriveDC, FrequencyConverterDC, AlarmSituationDC, PumpGroupControlModeDC, \
+    HeatMeterNamedDC
 
 
 class TestTimeSpentStateSerializer:
@@ -132,4 +135,36 @@ class TestAlarmSerializers:
         with pytest.raises(ValidationError):
             serializer = alarm(data=alarm_signal.model_dump())
             serializer.is_valid(raise_exception=True)
+
+
+class TestHeatMeterNamedSerializer:
+    heat_meter = HeatMeterNamedDC(
+        name="ИТП №1",
+        time_created_seconds=datetime.now(),
+        mass_consumption_supply=0.12,
+        mass_consumption_return=0.11,
+        mass_consumption_replenish=0.01,
+        consumption_replenish=10.01,
+        heat_energy_consumption=0.365,
+        temperature_supply_pipeline=105.3,
+        temperature_return_pipeline=72.2,
+        pressure_supply_pipeline=0.92,
+        pressure_return_pipeline=0.88,
+        time_normal_mode=60,
+        time_error_mode=0,
+        checksum=12365
+    )
+
+    @pytest.mark.parametrize("value", [0, 200, 0.00, 0.0001])
+    def test_validate_data(self, value):
+        self.heat_meter.temperature_supply_pipeline = value
+        serializer = HeatMeterNamedSerializer(data=self.heat_meter.model_dump())
+        assert serializer.is_valid(raise_exception=True) is True
+
+        data_fields: list = list(serializer.data.keys())
+        list_fields: list = self.heat_meter.list_fields()
+
+        assert len(data_fields) == len(list_fields)
+        for value in data_fields:
+            assert value in list_fields
 

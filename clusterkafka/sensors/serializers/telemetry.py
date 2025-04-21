@@ -4,11 +4,11 @@ from sensors.serializers.telemetry_heat_point import TelemetryHeatPointSerialize
 
 
 class HeatMeterNamedSerializer(HeatMeterSerializer):
-    name = serializers.CharField(max_length=100, min_length=1, help_text="Наименование по схеме")
+    name = serializers.CharField(max_length=100, min_length=3, help_text="Наименование по схеме")
 
 
 class TelemetryHeatPointNamedSerializer(TelemetryHeatPointSerializer):
-    name = serializers.CharField(max_length=100, min_length=1, help_text="Наименование по схеме")
+    name = serializers.CharField(max_length=100, min_length=3, help_text="Наименование по схеме")
 
 
 OBJECTS_TELEMETRY = {
