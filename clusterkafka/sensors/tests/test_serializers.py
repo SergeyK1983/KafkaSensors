@@ -2,9 +2,9 @@ import pytest
 from typing import Callable
 from rest_framework.exceptions import ValidationError
 
-from ..serializers import TimeSpentStateSerializer, ElectricDriveSerializer, FloodMonitoringSerializer, \
-    IllegalAccessSerializer, PressureMaintenanceMonitoringSerializer, PowerSupplyMonitoringSerializer, \
-    PumpGroupControlModeSerializer
+from sensors.serializers.serializers import TimeSpentStateSerializer, ElectricDriveSerializer, \
+    FloodMonitoringSerializer, IllegalAccessSerializer, PressureMaintenanceMonitoringSerializer, \
+    PowerSupplyMonitoringSerializer, PumpGroupControlModeSerializer
 from ..structures import ElectricDriveDC, FrequencyConverterDC, AlarmSituationDC, PumpGroupControlModeDC
 
 
