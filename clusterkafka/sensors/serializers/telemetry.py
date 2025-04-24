@@ -1,6 +1,7 @@
 from typing import Callable
 from rest_framework import serializers
 
+from sensors.constants import RegisteredObjects
 from sensors.serializers.telemetry_heat_point import TelemetryHeatPointSerializer, HeatMeterSerializer
 
 
@@ -18,10 +19,15 @@ OBJECTS_TELEMETRY: dict[str, Callable] = {
 }
 
 
-class TelemetrySerializer(serializers.Serializer):
-    """ Телеметрия """
-    pass
+HEAT_POINT_CENTER: str = RegisteredObjects.HEAT_POINT_CENTER.name.lower()
+HEAT_METER_CENTER: str = RegisteredObjects.HEAT_METER_CENTER.name.lower()
 
 
+fields: dict = {
+    HEAT_POINT_CENTER: OBJECTS_TELEMETRY[RegisteredObjects.HEAT_POINT_CENTER.value[1]](reuired=False, many=False),
+    HEAT_METER_CENTER: OBJECTS_TELEMETRY[RegisteredObjects.HEAT_METER_CENTER.value[1]](reuired=False, many=False),
+}
 
+
+TelemetrySerializer = type("TelemetrySerializer", (serializers.Serializer,), fields)
 

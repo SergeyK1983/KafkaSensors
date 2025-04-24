@@ -1,6 +1,16 @@
 from enum import Enum
 
 
+class RegisteredObjects(Enum):
+    """
+    Зарегистрированные объекты для телеметрии.
+    value = ("Наименование", "ключ для OBJECTS_TELEMETRY")
+    """
+
+    HEAT_POINT_CENTER = ("ИТП \"Центральный\"", "heat_point")
+    HEAT_METER_CENTER = ("Тепловой учет ИТП \"Центральный\"", "heat_meter")
+
+
 class AlarmSignalsHeatPoint(Enum):
     """ Аварийные сигналы теплового пункта """
 
