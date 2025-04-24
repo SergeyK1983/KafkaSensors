@@ -169,7 +169,7 @@ class TestHeatMeterNamedSerializer:
             assert value in list_fields
 
 
-class TestTelemetryHeatPointNamed:
+class TestTelemetryHeatPointNamedSerializer:
     heat_point = TelemetryHeatPointNamedDC(
         name="ИТП №1",
         pressure_supply_pipeline_heating_input=852.23,
