@@ -13,6 +13,9 @@ class TelemetryHeatPointNamedSerializer(TelemetryHeatPointSerializer):
     name = serializers.CharField(max_length=100, min_length=3, help_text="Наименование по схеме")
 
 
+#
+# ==== Телеметрия ====
+#
 OBJECTS_TELEMETRY: dict[str, Callable] = {
     "heat_point": TelemetryHeatPointNamedSerializer,
     "heat_meter": TelemetryHeatMeterNamedSerializer,
@@ -24,8 +27,12 @@ HEAT_METER_CENTER: str = RegisteredObjects.HEAT_METER_CENTER.name.lower()
 
 
 fields: dict = {
-    HEAT_POINT_CENTER: OBJECTS_TELEMETRY[RegisteredObjects.HEAT_POINT_CENTER.value[1]](reuired=False, many=False),
-    HEAT_METER_CENTER: OBJECTS_TELEMETRY[RegisteredObjects.HEAT_METER_CENTER.value[1]](reuired=False, many=False),
+    HEAT_POINT_CENTER: OBJECTS_TELEMETRY[RegisteredObjects.HEAT_POINT_CENTER.value[1]](
+        required=False, allow_null=True, many=False
+    ),
+    HEAT_METER_CENTER: OBJECTS_TELEMETRY[RegisteredObjects.HEAT_METER_CENTER.value[1]](
+        required=False, allow_null=True, many=False
+    ),
 }
 
 

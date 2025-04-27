@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
 from typing import Callable
+
 from rest_framework.exceptions import ValidationError
 
 from sensors.serializers.serializers import TimeSpentStateSerializer, ElectricDriveSerializer, \

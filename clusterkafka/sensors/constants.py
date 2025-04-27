@@ -8,7 +8,7 @@ class RegisteredObjects(Enum):
     """
 
     HEAT_POINT_CENTER = ("ИТП \"Центральный\"", "heat_point")
-    HEAT_METER_CENTER = ("Тепловой учет ИТП \"Центральный\"", "heat_meter")
+    HEAT_METER_CENTER = ("ИТП \"Центральный\" Тепловой учет", "heat_meter")
 
 
 class AlarmSignalsHeatPoint(Enum):
