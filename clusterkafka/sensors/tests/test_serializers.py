@@ -1,8 +1,15 @@
 import pytest
+from datetime import datetime
+from typing import Callable
+
 from rest_framework.exceptions import ValidationError
 
-from ..serializers import TimeSpentStateSerializer, ElectricDriveSerializer
-from ..structures import ElectricDriveDC, FrequencyConverterDC
+from sensors.serializers.serializers import TimeSpentStateSerializer, ElectricDriveSerializer, \
+    FloodMonitoringSerializer, IllegalAccessSerializer, PressureMaintenanceMonitoringSerializer, \
+    PowerSupplyMonitoringSerializer, PumpGroupControlModeSerializer
+from ..serializers.telemetry import TelemetryHeatMeterNamedSerializer, TelemetryHeatPointNamedSerializer
+from ..structures import ElectricDriveDC, FrequencyConverterDC, AlarmSituationDC, PumpGroupControlModeDC, \
+    HeatMeterNamedDC, TelemetryHeatPointNamedDC
 
 
 class TestTimeSpentStateSerializer:
@@ -63,3 +70,133 @@ class TestElectricDriveSerializer:
 
         assert "Поле должно быть True" in str(exc_info.value)
 
+
+class TestPumpGroupControlModeSerializer:
+
+    def test_validate_data(self, data_for_driver):
+        driver_1 = ElectricDriveDC(**data_for_driver)
+        driver_2 = ElectricDriveDC(**data_for_driver)
+        driver_2.name = "Циркуляционный насос №2"
+        driver_2.work = False
+        driver_2.stop = True
+
+        circulation_pumps = PumpGroupControlModeDC(
+            name="Циркуляционные насосы",
+            is_automatic=True,
+            electric_drivers=[driver_1, driver_2]
+        )
+        serializer = PumpGroupControlModeSerializer(data=circulation_pumps.model_dump())
+        assert serializer.is_valid(raise_exception=True) is True
+
+        data: dict = serializer.data
+        assert len(data) == 3
+
+    def test_not_validate_data(self):
+        """ Список насосов в группе не должен быть пустым """
+
+        circulation_pumps = PumpGroupControlModeDC(
+            name="Циркуляционные насосы",
+            is_automatic=True
+        )
+        serializer = PumpGroupControlModeSerializer(data=circulation_pumps.model_dump())
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.is_valid(raise_exception=True)
+
+        assert "Список не должен быть пустым" in str(exc_info.value)
+
+
+class TestAlarmSerializers:
+
+    ALARMS: tuple[Callable] = (
+        FloodMonitoringSerializer,
+        IllegalAccessSerializer,
+        PowerSupplyMonitoringSerializer,
+        PressureMaintenanceMonitoringSerializer
+    )
+
+    @pytest.mark.parametrize("alarm", [*ALARMS])
+    def test_alarms_validate_data(self, alarm):
+        alarm_signal = AlarmSituationDC(alarm=True, quantity_seconds=10)
+        serializer = alarm(data=alarm_signal.model_dump())
+
+        assert serializer.is_valid(raise_exception=True) is True
+
+        data = serializer.data
+        assert len(data) == 3
+        assert data.get("name") is not None
+        assert data.get("alarm") is not None
+        assert data.get("time_spent") is not None
+
+    @pytest.mark.parametrize("alarm", [*ALARMS])
+    def test_alarms_not_validate_data(self, alarm):
+        """ Seconds should be positive numbers. """
+
+        alarm_signal = AlarmSituationDC(alarm=True, quantity_seconds=-2)
+
+        with pytest.raises(ValidationError):
+            serializer = alarm(data=alarm_signal.model_dump())
+            serializer.is_valid(raise_exception=True)
+
+
+class TestHeatMeterNamedSerializer:
+    heat_meter = HeatMeterNamedDC(
+        name="Учет тепловой энергии ИТП №1",
+        time_created_seconds=datetime.now(),
+        mass_consumption_supply=0.12,
+        mass_consumption_return=0.11,
+        mass_consumption_replenish=0.01,
+        consumption_replenish=10.01,
+        heat_energy_consumption=0.365,
+        temperature_supply_pipeline=105.3,
+        temperature_return_pipeline=72.2,
+        pressure_supply_pipeline=0.92,
+        pressure_return_pipeline=0.88,
+        time_normal_mode=60,
+        time_error_mode=0,
+        checksum=12365
+    )
+
+    @pytest.mark.parametrize("value", [0, 200, 0.00, 0.0001])
+    def test_validate_data(self, value):
+        self.heat_meter.temperature_supply_pipeline = value
+        serializer = TelemetryHeatMeterNamedSerializer(data=self.heat_meter.model_dump())
+        assert serializer.is_valid(raise_exception=True) is True
+
+        data_fields: list[str] = list(serializer.data.keys())
+        list_fields: list[str] = self.heat_meter.list_fields()
+
+        assert len(data_fields) == len(list_fields)
+        for value in data_fields:
+            assert value in list_fields
+
+
+class TestTelemetryHeatPointNamedSerializer:
+    heat_point = TelemetryHeatPointNamedDC(
+        name="ИТП №1",
+        pressure_supply_pipeline_heating_input=852.23,
+        pressure_return_pipeline_heating_input=800.37,
+        temperature_supply_pipeline_heating_input=104.33,
+        temperature_return_pipeline_heating_input=75.63,
+        outdoor_air_temperature=-24.5,
+        pressure_supply_pipeline_heating_output=849.3,
+        pressure_return_pipeline_heating_output=800.75,
+        temperature_supply_pipeline_heating_output=90.5,
+        temperature_return_pipeline_heating_output=71.6,
+        power_input_main=AlarmSituationDC(),
+        power_input_reserve=AlarmSituationDC(),
+        pressure_maintenance=AlarmSituationDC(),
+        illegal_access=AlarmSituationDC(),
+        flood_monitoring=AlarmSituationDC()
+    )
+
+    def test_validate_data(self):
+        serializer = TelemetryHeatPointNamedSerializer(data=self.heat_point.model_dump())
+        assert serializer.is_valid(raise_exception=True) is True
+
+        data_fields: list[str] = list(serializer.data.keys())
+        list_fields: list[str] = self.heat_point.list_fields()
+
+        assert len(data_fields) == len(list_fields)
+        assert len(data_fields) == 17
+        for value in data_fields:
+            assert value in list_fields
