@@ -2,7 +2,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
 from sensors.serializers.serializers import PowerSupplyMonitoringSerializer, PressureMaintenanceMonitoringSerializer, \
-    IllegalAccessSerializer, FloodMonitoringSerializer
+    IllegalAccessSerializer, FloodMonitoringSerializer, PumpGroupControlModeSerializer, ElectricDriveSerializer
 
 
 class HeatMeterSerializer(serializers.Serializer):
@@ -107,4 +107,6 @@ class TelemetryHeatPointSerializer(serializers.Serializer):
     pressure_maintenance = PressureMaintenanceMonitoringSerializer(many=False)
     illegal_access = IllegalAccessSerializer(many=False)
     flood_monitoring = FloodMonitoringSerializer(many=False)
+    pump_groups = PumpGroupControlModeSerializer(required=False, allow_null=True, many=True)
+    pumps = ElectricDriveSerializer(required=False, allow_null=True, many=True)
 

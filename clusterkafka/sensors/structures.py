@@ -89,4 +89,6 @@ class TelemetryHeatPointNamedDC(CommonBaseMethods):
     pressure_maintenance: AlarmSituationDC
     illegal_access: AlarmSituationDC
     flood_monitoring: AlarmSituationDC
+    pump_groups: list[PumpGroupControlModeDC] | None = None
+    pumps: list[ElectricDriveDC] | None = None
 

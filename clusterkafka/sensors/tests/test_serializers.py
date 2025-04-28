@@ -197,5 +197,6 @@ class TestTelemetryHeatPointNamedSerializer:
         list_fields: list[str] = self.heat_point.list_fields()
 
         assert len(data_fields) == len(list_fields)
+        assert len(data_fields) == 17
         for value in data_fields:
             assert value in list_fields
