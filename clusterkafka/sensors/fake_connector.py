@@ -1,12 +1,15 @@
 from datetime import datetime
 from random import random, randint, uniform
+from typing import Any
 
 from sensors.constants import RegisteredObjects
-from sensors.structures import TelemetryHeatMeterNamedDC, TelemetryHeatPointNamedDC, PumpGroupControlModeDC, ElectricDriveDC, \
-    AlarmSituationDC, FrequencyConverterDC
+from sensors.serializers.telemetry import HEAT_METER_CENTER, HEAT_POINT_CENTER
+from sensors.structures import TelemetryHeatMeterNamedDC, TelemetryHeatPointNamedDC, PumpGroupControlModeDC, \
+    ElectricDriveDC, AlarmSituationDC, FrequencyConverterDC
 
 
 class FakeHeatMeterCenter:
+    """ Телеметрия теплового учета. ИТП "Центральный". """
 
     @classmethod
     def input_data(cls) -> TelemetryHeatMeterNamedDC:
@@ -30,6 +33,7 @@ class FakeHeatMeterCenter:
 
 
 class FakeHeatPointCenter:
+    """ Телеметрия ИТП "Центральный" """
 
     @classmethod
     def input_data(cls) -> TelemetryHeatPointNamedDC:
@@ -89,3 +93,20 @@ class FakeHeatPointCenter:
             pumps=[hot_water_pump]
         )
         return data
+
+
+class FakeConnector:
+    """ Как бы входящая телеметрия """
+
+    @classmethod
+    def input_data(cls) -> dict[str, Any]:
+        """ Входящие данные телеметрии для зарегистрированных объектов """
+
+        object_heat_meter: TelemetryHeatMeterNamedDC = FakeHeatMeterCenter.input_data()
+        object_heat_point: TelemetryHeatPointNamedDC = FakeHeatPointCenter.input_data()
+
+        data_from_connector: dict = {
+            HEAT_METER_CENTER: object_heat_meter.model_dump(),
+            HEAT_POINT_CENTER: object_heat_point.model_dump()
+        }
+        return data_from_connector
