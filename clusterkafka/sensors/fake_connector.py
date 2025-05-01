@@ -66,6 +66,9 @@ class FakeHeatPointCenter:
             is_frequency_converter=False
         )
 
+        alarm = bool(randint(0, 1))
+        quantity_seconds = randint(0, 50000) if alarm else 0
+
         data = TelemetryHeatPointNamedDC(
             name=RegisteredObjects.HEAT_POINT_CENTER.value[0],
             pressure_supply_pipeline_heating_input=round(uniform(700, 990), 2),
@@ -80,7 +83,7 @@ class FakeHeatPointCenter:
             power_input_main=AlarmSituationDC(),
             power_input_reserve=AlarmSituationDC(),
             pressure_maintenance=AlarmSituationDC(),
-            illegal_access=AlarmSituationDC(),
+            illegal_access=AlarmSituationDC(alarm=alarm, quantity_seconds=quantity_seconds),
             flood_monitoring=AlarmSituationDC(),
             pump_groups=[circulation_pumps],
             pumps=[hot_water_pump]
