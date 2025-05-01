@@ -2,10 +2,10 @@ from typing import Callable
 from rest_framework import serializers
 
 from sensors.constants import RegisteredObjects
-from sensors.serializers.telemetry_heat_point import TelemetryHeatPointSerializer, HeatMeterSerializer
+from sensors.serializers.telemetry_heat_point import TelemetryHeatPointSerializer, TelemetryHeatMeterSerializer
 
 
-class TelemetryHeatMeterNamedSerializer(HeatMeterSerializer):
+class TelemetryHeatMeterNamedSerializer(TelemetryHeatMeterSerializer):
     name = serializers.CharField(max_length=100, min_length=3, help_text="Наименование по схеме")
 
 

@@ -9,7 +9,7 @@ from sensors.serializers.serializers import TimeSpentStateSerializer, ElectricDr
     PowerSupplyMonitoringSerializer, PumpGroupControlModeSerializer
 from ..serializers.telemetry import TelemetryHeatMeterNamedSerializer, TelemetryHeatPointNamedSerializer
 from ..structures import ElectricDriveDC, FrequencyConverterDC, AlarmSituationDC, PumpGroupControlModeDC, \
-    HeatMeterNamedDC, TelemetryHeatPointNamedDC
+    TelemetryHeatMeterNamedDC, TelemetryHeatPointNamedDC
 
 
 class TestTimeSpentStateSerializer:
@@ -139,7 +139,7 @@ class TestAlarmSerializers:
 
 
 class TestHeatMeterNamedSerializer:
-    heat_meter = HeatMeterNamedDC(
+    heat_meter = TelemetryHeatMeterNamedDC(
         name="Учет тепловой энергии ИТП №1",
         time_created_seconds=datetime.now(),
         mass_consumption_supply=0.12,

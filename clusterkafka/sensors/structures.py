@@ -51,8 +51,8 @@ class AlarmSituationDC(CommonBaseMethods):
 
 
 @dataclass
-class HeatMeterNamedDC(CommonBaseMethods):
-    """ Учет тепловой энергии. HeatMeterNamedSerializer. """
+class TelemetryHeatMeterNamedDC(CommonBaseMethods):
+    """ Учет тепловой энергии. TelemetryHeatMeterNamedSerializer. """
 
     name: str
     time_created_seconds: datetime | None

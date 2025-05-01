@@ -2,15 +2,15 @@ from datetime import datetime
 from random import random, randint, uniform
 
 from sensors.constants import RegisteredObjects
-from sensors.structures import HeatMeterNamedDC, TelemetryHeatPointNamedDC, PumpGroupControlModeDC, ElectricDriveDC, \
+from sensors.structures import TelemetryHeatMeterNamedDC, TelemetryHeatPointNamedDC, PumpGroupControlModeDC, ElectricDriveDC, \
     AlarmSituationDC, FrequencyConverterDC
 
 
 class FakeHeatMeterCenter:
 
     @classmethod
-    def input_data(cls) -> HeatMeterNamedDC:
-        data = HeatMeterNamedDC(
+    def input_data(cls) -> TelemetryHeatMeterNamedDC:
+        data = TelemetryHeatMeterNamedDC(
             name=RegisteredObjects.HEAT_METER_CENTER.value[0],
             time_created_seconds=datetime.now(),
             mass_consumption_supply=round(random(), 4),

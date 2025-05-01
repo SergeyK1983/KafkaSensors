@@ -5,7 +5,7 @@ from sensors.serializers.serializers import PowerSupplyMonitoringSerializer, Pre
     IllegalAccessSerializer, FloodMonitoringSerializer, PumpGroupControlModeSerializer, ElectricDriveSerializer
 
 
-class HeatMeterSerializer(serializers.Serializer):
+class TelemetryHeatMeterSerializer(serializers.Serializer):
     """ Теплосчетчик с часовыми показателями. Учетные показатели с нарастающим итогом. """
 
     time_created_seconds = serializers.DateTimeField(

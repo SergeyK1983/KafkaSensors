@@ -1,7 +1,7 @@
 from sensors.constants import RegisteredObjects
 from sensors.serializers.telemetry import TelemetrySerializer, HEAT_METER_CENTER, HEAT_POINT_CENTER
-from sensors.structures import HeatMeterNamedDC, TelemetryHeatPointNamedDC, ElectricDriveDC, PumpGroupControlModeDC, \
-    FrequencyConverterDC
+from sensors.structures import TelemetryHeatMeterNamedDC, TelemetryHeatPointNamedDC, ElectricDriveDC, \
+    PumpGroupControlModeDC, FrequencyConverterDC
 
 
 class TestTelemetrySerializer:
@@ -10,7 +10,7 @@ class TestTelemetrySerializer:
         heat_meter_name: str = HEAT_METER_CENTER
         data_heat_meter_center: dict = data_for_heat_meter
 
-        object_heat_meter = HeatMeterNamedDC(
+        object_heat_meter = TelemetryHeatMeterNamedDC(
             name=RegisteredObjects.HEAT_METER_CENTER.value[0], **data_heat_meter_center
         )
         data_from_connector: dict = {heat_meter_name: object_heat_meter.model_dump()}
