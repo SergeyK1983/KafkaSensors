@@ -1,9 +1,9 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 
-from sensors.fake_connector import FakeHeatMeterCenter
-from sensors.serializers.telemetry import TelemetrySerializer, HEAT_METER_CENTER
-from sensors.structures import HeatMeterNamedDC
+from sensors.fake_connector import FakeHeatMeterCenter, FakeHeatPointCenter
+from sensors.serializers.telemetry import TelemetrySerializer, HEAT_METER_CENTER, HEAT_POINT_CENTER
+from sensors.structures import HeatMeterNamedDC, TelemetryHeatPointNamedDC
 
 
 class TelemetryRetrieveAPIView(generics.RetrieveAPIView):
@@ -13,7 +13,12 @@ class TelemetryRetrieveAPIView(generics.RetrieveAPIView):
         """ API для просмотра примера входных данных объектов телеметрии """
 
         object_heat_meter: HeatMeterNamedDC = FakeHeatMeterCenter.input_data()
-        data_from_connector: dict = {HEAT_METER_CENTER: object_heat_meter.model_dump()}
+        object_heat_point: TelemetryHeatPointNamedDC = FakeHeatPointCenter.input_data()
+
+        data_from_connector: dict = {
+            HEAT_METER_CENTER: object_heat_meter.model_dump(),
+            HEAT_POINT_CENTER: object_heat_point.model_dump()
+        }
 
         serializer = self.serializer_class(data=data_from_connector)
         serializer.is_valid(raise_exception=True)
