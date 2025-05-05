@@ -12,6 +12,7 @@ Markdown = ">=3.7"
 psycopg2-binary = ">=2.9"
 python-dotenv = "*"
 drf-yasg = ">=1.21"
+uvicorn = "==0.34.2"
 
 [dev-packages]
 pytest = ">=8.3"

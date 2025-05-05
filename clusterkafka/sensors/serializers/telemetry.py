@@ -1,4 +1,6 @@
 from typing import Callable
+
+from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
 from sensors.constants import RegisteredObjects
@@ -38,3 +40,9 @@ fields: dict = {
 
 TelemetrySerializer = type("TelemetrySerializer", (serializers.Serializer,), fields)
 
+
+class ShipmentsSerializer(serializers.Serializer):
+    number_shipments = serializers.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(100)],
+        help_text="Количество отправлений с коннекта"
+    )
