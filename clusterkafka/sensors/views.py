@@ -1,5 +1,6 @@
 import asyncio
 import json
+import threading
 import time
 import logging
 from datetime import datetime, timedelta
@@ -61,15 +62,12 @@ class TelemetrySenderListCreateAPIView(generics.ListCreateAPIView):
         return Response(f"Успешно, количество отправлений: {number_shipments}", status=status.HTTP_200_OK)
 
 
-async def sender() -> None:
+async def sender(wait_sec: int) -> None:
     print("погнали")
-
-    async with AsyncContextManager():
-        data: dict = FakeConnector.input_data()
-
+    data: dict = FakeConnector.input_data()
     serializer = TelemetrySerializer(data=data)
     serializer.is_valid(raise_exception=True)
-    await asyncio.sleep(1)
+    await asyncio.sleep(wait_sec)
     # data = serializer.data
     return None
 
@@ -87,7 +85,21 @@ async def sender_telemetry(request):
         return JsonResponse(data={"error": exc.detail}, status=status.HTTP_400_BAD_REQUEST)
 
     number_shipments: int = serializer.validated_data["number_shipments"]
-    await sender()
+    start_time = time.time()  # время UTC в [с], * 1000 будут [мс].
+    end_time = time.time()
+    print(f"{end_time - start_time = }")
 
+    return JsonResponse(data={"OK": "Передача"}, status=status.HTTP_200_OK)
+
+
+async def three_telemetry(request):
+    if request.method != "GET":
+        return JsonResponse(data={"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    # asyncio.TaskGroup() in python 3.11
+    start_time = time.time()  # время UTC в [с], * 1000 будут [мс].
+    task = asyncio.gather(sender(wait_sec=1), sender(wait_sec=1), sender(wait_sec=1))
+    await task
+    end_time = time.time()
+    print(f"{end_time - start_time = }")
     return JsonResponse(data={"OK": "Передача"}, status=status.HTTP_200_OK)
 
