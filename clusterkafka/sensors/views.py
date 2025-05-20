@@ -1,18 +1,18 @@
 import asyncio
 import json
-import threading
 import time
 import logging
 from datetime import datetime, timedelta
-from typing import AsyncContextManager
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST, require_GET
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from sensors.fake_connector import FakeConnector
+from sensors.send_telemetry import sender, amount_sending
 from sensors.serializers.telemetry import TelemetrySerializer, ShipmentsSerializer
 
 
@@ -48,7 +48,7 @@ class TelemetrySenderListCreateAPIView(generics.ListCreateAPIView):
 
         for i in range(number_shipments):
             start: datetime = datetime.now()
-            print(f"{start.strftime('%Y-%m-%d %H:%M:%S') = }")
+            print(f"{time.strftime('%Y-%m-%d %H:%M:%S') = }")
             time.sleep(1)
             connector = TelemetrySerializer(data=FakeConnector.input_data())
             connector.is_valid()
@@ -62,20 +62,10 @@ class TelemetrySenderListCreateAPIView(generics.ListCreateAPIView):
         return Response(f"Успешно, количество отправлений: {number_shipments}", status=status.HTTP_200_OK)
 
 
-async def sender(wait_sec: int) -> None:
-    print("погнали")
-    data: dict = FakeConnector.input_data()
-    serializer = TelemetrySerializer(data=data)
-    serializer.is_valid(raise_exception=True)
-    await asyncio.sleep(wait_sec)
-    # data = serializer.data
-    return None
-
-
 @csrf_exempt
+@require_POST
 async def sender_telemetry(request):
-    if request.method != "POST":
-        return JsonResponse(data={"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    """ Требуется выполнять приём и обработку заданного количества сообщений поступающих раз секунду """
 
     data: dict = json.loads(request.body)
     serializer = ShipmentsSerializer(data=data)
@@ -85,16 +75,15 @@ async def sender_telemetry(request):
         return JsonResponse(data={"error": exc.detail}, status=status.HTTP_400_BAD_REQUEST)
 
     number_shipments: int = serializer.validated_data["number_shipments"]
-    start_time = time.time()  # время UTC в [с], * 1000 будут [мс].
-    end_time = time.time()
-    print(f"{end_time - start_time = }")
+    asyncio.create_task(amount_sending(count=number_shipments))  # noqa
 
     return JsonResponse(data={"OK": "Передача"}, status=status.HTTP_200_OK)
 
 
+@require_GET
 async def three_telemetry(request):
-    if request.method != "GET":
-        return JsonResponse(data={"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    """ Три задачи """
+
     # asyncio.TaskGroup() in python 3.11
     start_time = time.time()  # время UTC в [с], * 1000 будут [мс].
     task = asyncio.gather(sender(wait_sec=1), sender(wait_sec=1), sender(wait_sec=1))
