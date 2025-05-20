@@ -10,7 +10,8 @@ class TelemetryHeatMeterSerializer(serializers.Serializer):
 
     time_created_seconds = serializers.DateTimeField(
         required=False,
-        help_text="Время архивирования"
+        help_text="Время архивирования",
+        input_formats=["%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"],
     )
     mass_consumption_supply = serializers.FloatField(
         validators=[MinValueValidator(0.0000)],

@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from sensors.fake_connector import FakeConnector
-from sensors.send_telemetry import sender, amount_sending
+from sensors.send_telemetry import sender, send_fake_telemetry, task_with_fake_telemetry
 from sensors.serializers.telemetry import TelemetrySerializer, ShipmentsSerializer
 
 
@@ -62,24 +62,6 @@ class TelemetrySenderListCreateAPIView(generics.ListCreateAPIView):
         return Response(f"Успешно, количество отправлений: {number_shipments}", status=status.HTTP_200_OK)
 
 
-@csrf_exempt
-@require_POST
-async def sender_telemetry(request):
-    """ Требуется выполнять приём и обработку заданного количества сообщений поступающих раз секунду """
-
-    data: dict = json.loads(request.body)
-    serializer = ShipmentsSerializer(data=data)
-    try:
-        serializer.is_valid(raise_exception=True)
-    except ValidationError as exc:
-        return JsonResponse(data={"error": exc.detail}, status=status.HTTP_400_BAD_REQUEST)
-
-    number_shipments: int = serializer.validated_data["number_shipments"]
-    asyncio.create_task(amount_sending(count=number_shipments))  # noqa
-
-    return JsonResponse(data={"OK": "Передача"}, status=status.HTTP_200_OK)
-
-
 @require_GET
 async def three_telemetry(request):
     """ Три задачи """
@@ -91,4 +73,41 @@ async def three_telemetry(request):
     end_time = time.time()
     print(f"{end_time - start_time = }")
     return JsonResponse(data={"OK": "Передача"}, status=status.HTTP_200_OK)
+
+
+@csrf_exempt  # только для домашнего использования!
+@require_POST
+async def sending_fake_telemetry(request):
+    """ Отправляет телеметрию раз в секунду. Количество отправлений указано в запросе. """
+
+    data: dict = json.loads(request.body)
+    serializer = ShipmentsSerializer(data=data)
+    try:
+        serializer.is_valid(raise_exception=True)
+    except ValidationError as exc:
+        return JsonResponse(data={"error": exc.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+    number_shipments: int = serializer.validated_data["number_shipments"]
+    asyncio.create_task(send_fake_telemetry(count=number_shipments))  # noqa
+
+    return JsonResponse(data={"OK": f"Отправлено сообщений {number_shipments}"}, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@require_POST
+async def input_telemetry(request):
+    """ Принимает входящую телеметрию и обрабатываем """
+
+    # data: dict = json.loads(request.body)
+    data: dict = json.loads(json.loads(request.body))
+    serializer = TelemetrySerializer(data=data)
+
+    try:
+        serializer.is_valid(raise_exception=True)
+    except ValidationError as exc:
+        return JsonResponse(data={"error": exc.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+    asyncio.create_task(task_with_fake_telemetry(data=serializer.validated_data))  # noqa
+
+    return JsonResponse(data={"OK": f"Прием пришел корректно"}, status=status.HTTP_200_OK)
 

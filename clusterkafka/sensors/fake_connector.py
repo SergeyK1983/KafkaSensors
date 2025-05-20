@@ -15,7 +15,7 @@ class FakeHeatMeterCenter:
     def input_data(cls) -> TelemetryHeatMeterNamedDC:
         data = TelemetryHeatMeterNamedDC(
             name=RegisteredObjects.HEAT_METER_CENTER.value[0],
-            time_created_seconds=datetime.now(),
+            time_created_seconds=datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
             mass_consumption_supply=round(random(), 4),
             mass_consumption_return=round(random(), 4),
             mass_consumption_replenish=round(random(), 4),

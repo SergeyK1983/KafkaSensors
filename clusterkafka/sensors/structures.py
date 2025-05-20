@@ -55,7 +55,7 @@ class TelemetryHeatMeterNamedDC(CommonBaseMethods):
     """ Учет тепловой энергии. TelemetryHeatMeterNamedSerializer. """
 
     name: str
-    time_created_seconds: datetime | None
+    time_created_seconds: str | datetime | None
     mass_consumption_supply: float
     mass_consumption_return: float
     mass_consumption_replenish: float | None
