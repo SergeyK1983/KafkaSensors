@@ -1,4 +1,8 @@
+import os
 from enum import Enum
+
+
+PATH_SEND_TELEMETRY: str = os.getenv("PATH_SEND_TELEMETRY", )
 
 
 class RegisteredObjects(Enum):

@@ -1,13 +1,17 @@
 import json
 import time
 import asyncio
-from random import randint
+import logging
 from datetime import datetime
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientTimeout, ClientResponseError, ClientError
 
 from sensors.common import AsIterator
+from sensors.constants import PATH_SEND_TELEMETRY
 from sensors.fake_connector import FakeConnector
 from sensors.serializers.telemetry import TelemetrySerializer
+
+
+logger = logging.getLogger(__name__)
 
 
 async def sender(wait_sec: int | float) -> None:
@@ -27,13 +31,21 @@ async def sender(wait_sec: int | float) -> None:
 async def send_fake_telemetry(count: int):
     """ Отправляем как бы телеметрию раз в секунду """
 
-    async with ClientSession("http://localhost:8020/sensors/") as session:
+    timeout = ClientTimeout(total=0.7)
+    async with ClientSession(base_url=PATH_SEND_TELEMETRY, timeout=timeout) as session:
         async for i in AsIterator(count):
             start: float = time.perf_counter()  # счетчик производительности, включает время, прошедшее во время сна
             data: str = json.dumps(FakeConnector.input_data())
-            async with session.post("input-telemetry/", json=data) as response:
-                status: int = response.status
-                print(f"{status = } -> {datetime.now().strftime('%H:%M:%S.%f')} -> {await response.json()}")
+            try:
+                async with session.post("input-telemetry/", json=data) as response:
+                    status: int = response.status
+                    print(f"{status = } -> {datetime.now().strftime('%H:%M:%S.%f')} -> {await response.json()}")
+            except asyncio.exceptions.TimeoutError:
+                logger.error(msg=f"TimeoutError")
+            except ClientResponseError as err:
+                logger.error(msg=f"ClientResponseError: status = {err.status}, {err.message}")
+            except ClientError as err:
+                logger.error(msg=f"ClientError: msg = {err}")
 
             end: float = time.perf_counter()
             delay: float = 1 - (end - start) if end - start < 1 else 0
@@ -45,6 +57,8 @@ async def send_fake_telemetry(count: int):
 async def task_with_fake_telemetry(data: dict) -> None:
     """ Тут условно что-то делаем с полученной телеметрией """
 
-    await asyncio.sleep(randint(2, 7))
+    # как бы работаем только в нашем сервисе за примерно одинаковое время,
+    # чтобы гарантировать соответствие очередности поступающих данных
+    await asyncio.sleep(2)
     print(f"Из задачи {datetime.now().strftime('%H:%M:%S.%f')} {tuple(data.keys())}")
     return

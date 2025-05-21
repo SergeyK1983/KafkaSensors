@@ -98,8 +98,16 @@ async def sending_fake_telemetry(request):
 async def input_telemetry(request):
     """ Принимает входящую телеметрию и обрабатываем """
 
-    # data: dict = json.loads(request.body)
-    data: dict = json.loads(json.loads(request.body))
+    if request.content_type != "application/json":
+        msg = dict()
+        return JsonResponse(data=msg, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    body_data: str | dict = json.loads(request.body)
+    if isinstance(body_data, dict):
+        data = body_data
+    else:
+        data: dict = json.loads(body_data)
+
     serializer = TelemetrySerializer(data=data)
 
     try:
