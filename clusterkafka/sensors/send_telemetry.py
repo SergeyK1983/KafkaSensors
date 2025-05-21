@@ -35,11 +35,12 @@ async def send_fake_telemetry(count: int):
     async with ClientSession(base_url=PATH_SEND_TELEMETRY, timeout=timeout) as session:
         async for i in AsIterator(count):
             start: float = time.perf_counter()  # счетчик производительности, включает время, прошедшее во время сна
-            data: str = json.dumps(FakeConnector.input_data())
+            data: dict = FakeConnector.input_data()
             try:
-                async with session.post("input-telemetry/", json=data) as response:
+                async with session.post("input-telemetry/", json=data) as response:  # application/json auto
                     status: int = response.status
-                    print(f"{status = } -> {datetime.now().strftime('%H:%M:%S.%f')} -> {await response.json()}")
+                    message = await response.json()
+                    print(f"{status = } -> {datetime.now().strftime('%H:%M:%S.%f')} -> {message}")
             except asyncio.exceptions.TimeoutError:
                 logger.error(msg=f"TimeoutError")
             except ClientResponseError as err:
