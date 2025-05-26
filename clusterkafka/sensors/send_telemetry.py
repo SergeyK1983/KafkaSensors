@@ -7,6 +7,7 @@ from aiohttp import ClientSession, ClientTimeout, ClientResponseError, ClientErr
 
 from sensors.common import AsIterator
 from sensors.constants import PATH_SEND_TELEMETRY
+from sensors.exceptions import SensorResponseException
 from sensors.fake_connector import FakeConnector
 from sensors.serializers.telemetry import TelemetrySerializer
 
@@ -40,9 +41,10 @@ async def send_fake_telemetry(count: int):
                 async with session.post("input-telemetry/", json=data) as response:  # application/json auto
                     status: int = response.status
                     message = await response.json()
+                    SensorResponseException.raise_status_exception(response, message)
                     print(f"{status = } -> {datetime.now().strftime('%H:%M:%S.%f')} -> {message}")
             except asyncio.exceptions.TimeoutError:
-                logger.error(msg=f"TimeoutError")
+                logger.error(msg=f"TimeoutError, {datetime.now()}")
             except ClientResponseError as err:
                 logger.error(msg=f"ClientResponseError: status = {err.status}, {err.message}")
             except ClientError as err:
@@ -61,5 +63,5 @@ async def task_with_fake_telemetry(data: dict) -> None:
     # как бы работаем только в нашем сервисе за примерно одинаковое время,
     # чтобы гарантировать соответствие очередности поступающих данных
     await asyncio.sleep(2)
-    print(f"Из задачи {datetime.now().strftime('%H:%M:%S.%f')} {tuple(data.keys())}")
+    print(f"Из задачи по обработке: {datetime.now().strftime('%H:%M:%S.%f')}, {tuple(data.keys())}")
     return

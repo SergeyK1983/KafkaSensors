@@ -96,7 +96,7 @@ async def sending_fake_telemetry(request):
 @csrf_exempt
 @require_POST
 async def input_telemetry(request):
-    """ Принимает входящую телеметрию и обрабатываем """
+    """ Принимает входящую телеметрию и обрабатывает """
 
     if request.content_type != "application/json":
         msg = dict()
