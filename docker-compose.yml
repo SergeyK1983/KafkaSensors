@@ -14,7 +14,137 @@ services:
       - pgdb:/var/lib/postgresql/data
     ports:
       - "5437:5432"
+    networks:
+      - sensors-network
+
+  zookeeper:
+    image: zookeeper:latest
+    container_name: sensors_zook
+    hostname: sensors_zook
+    environment:
+      ZOO_MY_ID: "1"
+      ZOO_PORT: "2181"
+      ZOO_STANDALONE_ENABLED: "true"
+    volumes:
+      - zookeeper-data:/data
+      - zookeeper-datalog:/datalog
+      - zookeeper-logs:/logs
+    ports:
+      - "21810:2181"
+    networks:
+      - sensors-network
+
+  kafka_1:
+    image: confluentinc/cp-kafka:latest
+    container_name: sensors_kafka_1
+    hostname: sensors_kafka_1
+    volumes:
+      - kafka-data-1:/var/lib/kafka/data
+      - kafka-secrets-1:/etc/kafka/secrets
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://sensors_kafka_1:9092,EXTERNAL://${KAFKA_IP:-localhost}:${KAFKA_PORT:-30940}"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
+    ports:
+      - "30940:30940"
+    depends_on:
+      - zookeeper
+    networks:
+      - sensors-network
+
+  kafka_2:
+    image: confluentinc/cp-kafka:latest
+    container_name: sensors_kafka_2
+    hostname: sensors_kafka_2
+    volumes:
+      - kafka-data-2:/var/lib/kafka/data
+      - kafka-secrets-2:/etc/kafka/secrets
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_BROKER_ID: "2"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://sensors_kafka_2:9092,EXTERNAL://${KAFKA_IP:-localhost}:${KAFKA_PORT:-30941}"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
+    ports:
+      - "30941:30941"
+    depends_on:
+      - zookeeper
+    networks:
+      - sensors-network
+
+  kafka_3:
+    image: confluentinc/cp-kafka:latest
+    container_name: sensors_kafka_3
+    hostname: sensors_kafka_3
+    volumes:
+      - kafka-data-3:/var/lib/kafka/data
+      - kafka-secrets-3:/etc/kafka/secrets
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_BROKER_ID: "3"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://sensors_kafka_3:9092,EXTERNAL://${KAFKA_IP:-localhost}:${KAFKA_PORT:-30942}"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
+    ports:
+      - "30942:30942"
+    depends_on:
+      - zookeeper
+    networks:
+      - sensors-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: sensors_kafka-ui
+    hostname: kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: sensors-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "sensors_kafka_1:9092,sensors_kafka_2:9092,sensors_kafka_3:9092"
+      KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper:2181"
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    ports:
+      - "8090:8080"
+    depends_on:
+      - kafka_1
+      - kafka_2
+      - kafka_3
+    networks:
+      - sensors-network
 
 volumes:
   pgdb:
     name: cluster_db
+  zookeeper-data:
+    name: sensors_zookeeper-data
+  zookeeper-datalog:
+    name: sensors_zookeeper-datalog
+  zookeeper-logs:
+    name: sensors_zookeeper-logs
+  kafka-data-1:
+    name: sensors_kafka-data-1
+  kafka-secrets-1:
+    name: sensors_kafka-secrets-1
+  kafka-data-2:
+    name: sensors_kafka-data-2
+  kafka-secrets-2:
+    name: sensors_kafka-secrets-2
+  kafka-data-3:
+    name: sensors_kafka-data-3
+  kafka-secrets-3:
+    name: sensors_kafka-secrets-3
+
+networks:
+  sensors-network:
+    name: sensors-network
+    attachable: true
+    driver: bridge
