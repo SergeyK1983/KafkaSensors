@@ -1,11 +1,13 @@
 from typing import Callable
+
+from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
 from sensors.constants import RegisteredObjects
-from sensors.serializers.telemetry_heat_point import TelemetryHeatPointSerializer, HeatMeterSerializer
+from sensors.serializers.telemetry_heat_point import TelemetryHeatPointSerializer, TelemetryHeatMeterSerializer
 
 
-class TelemetryHeatMeterNamedSerializer(HeatMeterSerializer):
+class TelemetryHeatMeterNamedSerializer(TelemetryHeatMeterSerializer):
     name = serializers.CharField(max_length=100, min_length=3, help_text="Наименование по схеме")
 
 
@@ -38,3 +40,9 @@ fields: dict = {
 
 TelemetrySerializer = type("TelemetrySerializer", (serializers.Serializer,), fields)
 
+
+class ShipmentsSerializer(serializers.Serializer):
+    number_shipments = serializers.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(100)],
+        help_text="Количество отправлений с коннекта"
+    )

@@ -1,3 +1,5 @@
 .idea
 clusterkafka/.env
+clusterkafka/.coverage
 
+temp.txt
