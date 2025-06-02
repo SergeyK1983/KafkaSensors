@@ -14,6 +14,7 @@ python-dotenv = "*"
 drf-yasg = ">=1.21"
 uvicorn = "==0.34.2"
 aiohttp = "==3.11.18"
+confluent-kafka = "==2.10.0"
 
 [dev-packages]
 pytest = ">=8.3"
