@@ -1,7 +1,8 @@
 import logging
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from confluent_kafka.admin import AdminClient, TopicMetadata
+from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic, KafkaError, KafkaException
 
 logger = logging.getLogger(__name__)
@@ -44,8 +45,8 @@ class Command(BaseCommand):
         )
 
         conf: dict = {
-            "bootstrap.servers": "localhost:30940,localhost:30941,localhost:30942",
-            "socket.timeout.ms": 2000
+            "bootstrap.servers": settings.KAFKA_CONFIG["bootstrap_servers"],
+            "socket.timeout.ms": settings.KAFKA_CONFIG["socket_timeout_ms"]
         }
         try:
             admin = AdminClient(conf=conf)

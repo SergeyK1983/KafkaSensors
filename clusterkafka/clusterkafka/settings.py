@@ -151,7 +151,8 @@ else:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Kafka
-# KAFKA_CONFIG = {
-#     "bootstrap_servers": os.getenv('BOOTSTRAP_SERVERS', 'localhost:29092'),
-#     "topic": os.getenv('TOPIC', 'check_topic'),
-# }
+KAFKA_CONFIG = {
+    "bootstrap_servers": os.getenv("BOOTSTRAP_SERVERS", "localhost:29092"),
+    "socket_timeout_ms": 2000,
+    # "topic": os.getenv('TOPIC', 'check_topic'),
+}
