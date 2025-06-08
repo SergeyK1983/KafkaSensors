@@ -54,7 +54,7 @@ class TelemetrySenderListCreateAPIView(generics.ListCreateAPIView):
             connector.is_valid()
             if connector.errors:
                 logger.error(connector.errors)
-            # Отправляем connector.validated_data в кафка
+            # Отправляем connector.data в кафка
             # ...
             finish: timedelta = datetime.now() - start
             print(f"{str(finish) = }")
@@ -87,7 +87,7 @@ async def sending_fake_telemetry(request):
     except ValidationError as exc:
         return JsonResponse(data={"error": exc.detail}, status=status.HTTP_400_BAD_REQUEST)
 
-    number_shipments: int = serializer.validated_data["number_shipments"]
+    number_shipments: int = serializer.data["number_shipments"]
     asyncio.create_task(send_fake_telemetry(count=number_shipments))  # noqa
 
     return JsonResponse(data={"OK": f"Отправлено сообщений {number_shipments}"}, status=status.HTTP_200_OK)
@@ -110,7 +110,7 @@ async def input_telemetry(request):
     except ValidationError as exc:
         return JsonResponse(data={"error": exc.detail}, status=status.HTTP_400_BAD_REQUEST)
 
-    asyncio.create_task(task_with_fake_telemetry(data=serializer.validated_data))  # noqa
+    asyncio.create_task(task_with_fake_telemetry(data=serializer.data))  # noqa
 
     return JsonResponse(data={"OK": f"Прием пришел корректно"}, status=status.HTTP_200_OK)
 

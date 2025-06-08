@@ -22,7 +22,7 @@ class ObjectHeatPointProducer:
     producer = Producer(CONF)
 
     def __init__(self):
-        ObjectHeatPointProducer.check_topic()
+        self.check_topic()
 
     @classmethod
     def check_topic(cls):
