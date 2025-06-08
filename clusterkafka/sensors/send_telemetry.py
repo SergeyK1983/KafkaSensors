@@ -8,6 +8,7 @@ from sensors.common import AsIterator
 from sensors.constants import PATH_SEND_TELEMETRY
 from sensors.exceptions import SensorResponseException
 from sensors.fake_connector import FakeConnector
+from sensors.kafka.producers import object_heat_point_producer
 from sensors.serializers.telemetry import TelemetrySerializer
 
 
@@ -59,6 +60,7 @@ async def send_fake_telemetry(count: int):
 async def task_with_fake_telemetry(data: dict) -> None:
     """ Тут условно что-то делаем с полученной телеметрией """
 
+    object_heat_point_producer.send(msg=data["heat_point_center"])  # примерно 0.0243c
     # как бы работаем только в нашем сервисе за примерно одинаковое время,
     # чтобы гарантировать соответствие очередности поступающих данных
     await asyncio.sleep(2)
