@@ -36,8 +36,8 @@ class ObjectHeatPointProducer:
         if err:
             logger.error('ERROR: Message failed delivery: {}'.format(err))
         else:
-            logger.info("Produced event to topic {topic}: key = {key:12}".format(
-                topic=msg.topic(), key=msg.key().decode('utf-8')
+            logger.info("Produced event to topic {topic}".format(
+                topic=msg.topic()  #, key=msg.key().decode('utf-8')
             ))
 
     def send(self, msg: str | dict | None = None):
@@ -65,7 +65,8 @@ class ObjectHeatPointProducer:
         #     # self.producer.abort_transaction()
 
         try:
-            self.producer.produce(topic=self.TOPIC, value=value, key="heat_point", callback=self.delivery_callback)  # асинхронная функция
+            # Если в сообщении задать параметр key="some", то сообщения будут попадать в один раздел
+            self.producer.produce(topic=self.TOPIC, value=value, callback=self.delivery_callback)  # асинхронная функция
         except KafkaException as exc:
             error: KafkaError = exc.args[0]
             logger.error("Ошибка3: %s, %s, %s" % (error.str(), error.code(), error.name()))
